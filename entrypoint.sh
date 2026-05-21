@@ -68,6 +68,12 @@ EOF
 
 MVN_ARGS="-pl hadoop-tools/hadoop-aws verify -Dtest=nothing -Dmaven.test.failure.ignore=false --no-transfer-progress"
 
+if [ -f /hadoop_s3a_skip.txt ]; then
+    tmp_excludes=$(mktemp)
+    grep -v '^\s*#\|^\s*$' /hadoop_s3a_skip.txt | sed 's/#.*//' | sort -u | sed 's|^|**/|; s|$|.java|' > "$tmp_excludes"
+    MVN_ARGS="$MVN_ARGS -Dfailsafe.excludesFile=$tmp_excludes"
+fi
+
 if [ -n "${IT_TEST:-}" ]; then
     MVN_ARGS="$MVN_ARGS -Dit.test=${IT_TEST}"
 fi
